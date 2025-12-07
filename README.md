@@ -220,6 +220,7 @@ Langgraph_project/
 │   └── evaluate.py     # RAGAS evaluation
 ├── main.py             # Main entry point
 ├── run_demo.py         # Demo script
+├── run_evaluation.py   # Evaluation script
 └── requirements.txt    # Dependencies
 ```
 
