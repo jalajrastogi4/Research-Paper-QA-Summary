@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.envs/.env.local
+.envs/.env.*
+!.envs/env.template
+
+# Data and Logs
+data/
+logs/
+*.log
+chromadb/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Test coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Project specific
+demo_results_*.json
+*.pdf
+
+# OS
+Thumbs.db
+.DS_Store
+
+fix_review.md
+full_analysis.md
+project_analysis.md
