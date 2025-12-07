@@ -187,22 +187,6 @@ All 3 extracted claims were verified as SUPPORTED:
 ![Hallucination Check](screenshots/hallucination_check3.png)
 ![Hallucination Check](screenshots/hallucination_check4.png)
 
-## Evaluation
-
-The system uses RAGAS for automated evaluation:
-
-```python
-from tests.evaluate import Evaluator
-
-evaluator = Evaluator()
-results = evaluator.evaluate_agent(assistant)
-```
-
-**Metrics**:
-- **Faithfulness**: Measures factual consistency with source
-- **Answer Relevancy**: Measures relevance to question
-- **Custom Hallucination Score**: Multi-layered verification
-
 ## 🛠️ Technical Stack
 
 - **Framework**: LangGraph, LangChain
