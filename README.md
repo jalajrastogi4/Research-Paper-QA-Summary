@@ -2,7 +2,7 @@
 
 A production-ready multi-agent system built with LangGraph for analyzing research papers from arXiv, featuring advanced hallucination detection and comprehensive observability.
 
-## 🌟 Key Features
+## Key Features
 
 - **Multi-Agent Architecture**: Specialized agents for fetching, parsing, summarizing, Q&A, and verification
 - **Advanced Hallucination Detection**: Multi-layered verification combining:
@@ -14,7 +14,7 @@ A production-ready multi-agent system built with LangGraph for analyzing researc
 - **RAGAS Evaluation**: Automated evaluation with faithfulness and answer relevancy metrics
 - **Vector-based RAG**: ChromaDB for efficient semantic search and retrieval
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 graph TD
@@ -45,7 +45,7 @@ graph TD
 | **QA Agent** | Answers questions with citations | RAG with top-k retrieval |
 | **Hallucination Detector** | Verifies answer accuracy | Multi-layered verification |
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -109,7 +109,7 @@ python main.py --arxiv-id 1706.03762 --question "What is the main contribution?"
 python run_demo.py
 ```
 
-## 📊 Demo Results
+## Demo Results
 
 ### Test Paper: "Attention Is All You Need" (1706.03762)
 
@@ -139,11 +139,11 @@ python run_demo.py
 
 All 3 extracted claims were verified as SUPPORTED:
 
-1. ✅ "The Transformer architecture primarily relies on an attention mechanism to draw global dependencies between input and output."
-2. ✅ "The design of the Transformer allows for significant parallelization of the training process."
-3. ✅ "The Transformer achieves state-of-the-art results in translation quality with reduced training time."
+1. "The Transformer architecture primarily relies on an attention mechanism to draw global dependencies between input and output."
+2. "The design of the Transformer allows for significant parallelization of the training process."
+3. "The Transformer achieves state-of-the-art results in translation quality with reduced training time."
 
-## 🔍 Observability with Langfuse
+## Observability with Langfuse
 
 ### Trace Overview
 
@@ -158,7 +158,7 @@ All 3 extracted claims were verified as SUPPORTED:
 ![Hallucination Check](screenshots/hallucination_check3.png)
 ![Hallucination Check](screenshots/hallucination_check4.png)
 
-## 🧪 Evaluation
+## Evaluation
 
 The system uses RAGAS for automated evaluation:
 
@@ -182,9 +182,9 @@ results = evaluator.evaluate_agent(assistant)
 - **Vector Store**: ChromaDB
 - **Observability**: Langfuse
 - **Evaluation**: RAGAS
-- **Async**: asyncio, Celery (planned)
+- **Async**: asyncio
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Langgraph_project/
@@ -210,68 +210,6 @@ Langgraph_project/
 └── requirements.txt    # Dependencies
 ```
 
-## 🚧 Future Improvements
-
-### Performance Optimization
-
-1. **MongoDB + Celery Caching** (Priority: High)
-   - Cache parsed papers in MongoDB
-   - Background processing with Celery
-   - Reduce latency from 30s to <1s for cached papers
-
-2. **Semantic Caching for Q&A** (Priority: High)
-   - Redis with vector search for similar questions
-   - Avoid redundant LLM calls
-   - Significant cost reduction
-
-### Quality Improvements
-
-3. **HyDE + Hybrid Retrieval + Reranking** (Priority: Critical)
-   - Hypothetical Document Embeddings for better query understanding
-   - Combine semantic search (embeddings) with BM25 (keyword)
-   - Two-stage reranking with cross-encoder
-   - Expected: 30-50% improvement in answer quality
-
-4. **FastAPI + Postgres Job Tracking** (Priority: Medium)
-   - Async API for long-running tasks
-   - Job status tracking in Postgres
-   - Better UX for multi-minute operations
-
-### Scalability
-
-5. **Distributed Processing**
-   - Multi-paper batch processing
-   - Parallel agent execution
-   - Horizontal scaling with Kubernetes
-
-## 📈 Performance Benchmarks
-
-| Metric | Value |
-|--------|-------|
-| Paper Processing Time | ~2-3 minutes |
-| Hallucination Detection Accuracy | 95%+ |
-| Average Retrieval Relevance | 87.75% |
-| LLM API Calls per Query | ~8-12 |
-
-## 🤝 Contributing
-
-Contributions welcome! Areas of interest:
-- Additional hallucination detection methods
-- Support for other paper sources (PubMed, Semantic Scholar)
-- Multi-language support
-- UI/Frontend development
-
-## 📄 License
+## License
 
 MIT License
-
-## 🙏 Acknowledgments
-
-- LangChain/LangGraph for the framework
-- OpenAI for LLM capabilities
-- Langfuse for observability tools
-- RAGAS for evaluation metrics
-
----
-
-**Built with ❤️ for GenAI research and production applications**
