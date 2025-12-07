@@ -203,7 +203,9 @@ All 3 extracted claims were verified as SUPPORTED:
 Langgraph_project/
 ├── agents/              # Agent implementations
 │   ├── fetcher.py      # ArXiv paper fetcher
+│   ├── graph_input.py  # Pydantic model for graph input
 │   ├── parser.py       # Section parser
+│   ├── state.py        # State for graph
 │   ├── summarizer.py   # Summary generator
 │   ├── qa_agent.py     # Q&A with RAG
 │   ├── hallucination_detector.py  # Multi-layered verification
@@ -215,7 +217,8 @@ Langgraph_project/
 │   ├── arxiv_fetcher.py   # ArXiv API wrapper
 │   ├── vector_store.py    # ChromaDB manager
 │   ├── prompts.py         # LLM prompts
-│   └── chunker.py         # Text chunking
+│   ├── chunker.py         # Text chunking
+│   └── llm.py             # LLM wrapper
 ├── tests/              # Evaluation
 │   └── evaluate.py     # RAGAS evaluation
 ├── main.py             # Main entry point
