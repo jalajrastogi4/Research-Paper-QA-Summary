@@ -105,8 +105,37 @@ CONSISTENCY_SCORE=0.2
 # Run on a paper
 python main.py --arxiv-id 1706.03762 --question "What is the main contribution?"
 
-# Run demo
+# Run demo (quick demonstration)
 python run_demo.py
+
+# Run RAGAS evaluation
+python run_evaluation.py
+```
+
+### RAGAS Evaluation
+
+The system includes comprehensive evaluation using RAGAS metrics:
+
+```bash
+python run_evaluation.py
+```
+
+**Metrics Computed:**
+- **Faithfulness**: Measures factual consistency with retrieved context
+- **Answer Relevancy**: Measures how relevant the answer is to the question
+- **Hallucination Risk**: Multi-layered verification (citation + NLI + consistency)
+- **Retrieval Quality**: Average relevance scores of retrieved chunks
+
+**Expected Output:**
+```
+RAGAS Metrics:
+  • Faithfulness:      
+  • Answer Relevancy:  
+
+System Metrics:
+  • Questions Evaluated:
+  • Avg Hallucination Risk:  
+  • Avg Retrieval Relevance: 
 ```
 
 ## Demo Results

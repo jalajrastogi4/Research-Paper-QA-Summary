@@ -67,11 +67,13 @@ class VectorStoreManager:
         )
         
         relevant_chunks = []
-        for doc, score in results:
+        for doc, distance in results:
+            similarity_score = 1 / (1 + distance)
+            
             relevant_chunks.append({
                 "content": doc.page_content,
                 "metadata": doc.metadata,
-                "relevance_score": float(score)
+                "relevance_score": float(similarity_score)
             })
 
         return relevant_chunks

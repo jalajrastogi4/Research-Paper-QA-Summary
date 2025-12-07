@@ -64,6 +64,7 @@ coverage.xml
 
 # Project specific
 demo_results_*.json
+evaluation_results_*.json
 *.pdf
 
 # OS
