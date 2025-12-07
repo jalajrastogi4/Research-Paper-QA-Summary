@@ -155,7 +155,8 @@ All 3 extracted claims were verified as SUPPORTED:
 
 ### Hallucination Detection Insights
 
-![Hallucination Check](screenshots/hallucination_check.png)
+![Hallucination Check](screenshots/hallucination_check3.png)
+![Hallucination Check](screenshots/hallucination_check4.png)
 
 ## 🧪 Evaluation
 
