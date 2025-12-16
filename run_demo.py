@@ -4,7 +4,7 @@ Demo script to run LangGraph system and capture results for README
 import asyncio
 import json
 from datetime import datetime
-from main import ResearchAssistant
+from agents.research_agent_evaluate import ResearchAssistantEvaluate
 
 async def run_demo():
     """Run demo on sample paper"""
@@ -14,7 +14,7 @@ async def run_demo():
     
     # Initialize assistant
     print("\n[1/3] Initializing Research Assistant...")
-    assistant = ResearchAssistant()
+    assistant = ResearchAssistantEvaluate()
     
     # Test paper - using well-known Transformer paper
     test_paper = {

@@ -7,7 +7,7 @@ from ragas.embeddings import LangchainEmbeddingsWrapper
 from ragas.metrics import faithfulness, answer_relevancy
 
 from utils.llm import llm_model
-from main import ResearchAssistant
+from agents.research_agent_evaluate import ResearchAssistantEvaluate
 
 class AsyncEvaluator:
     """Evaluator for RAGAS metrics"""
@@ -37,7 +37,7 @@ class AsyncEvaluator:
             }
         ]
     
-    async def evaluate_agent(self, assistant: ResearchAssistant, test_cases=None):
+    async def evaluate_agent(self, assistant: ResearchAssistantEvaluate, test_cases=None):
         """Run evaluation on benchmark questions"""
         test_cases = test_cases or self.benchmark
         

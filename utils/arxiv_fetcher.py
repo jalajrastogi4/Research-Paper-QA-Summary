@@ -4,19 +4,20 @@ import pypdf
 import ssl
 from typing import Tuple, List
 from pathlib import Path
+from datetime import datetime
 
 from core.config import settings
 from core.logging import get_logger
 
 logger = get_logger()
 
-async def fetch_arxiv_paper(arxiv_id: str) -> Tuple[str, str, List[str]]:
+async def fetch_arxiv_paper(arxiv_id: str) -> Tuple[str, str, List[str], datetime]:
     """Download and extract text from arXiv paper"""
-    text, paper_title, paper_authors = await asyncio.to_thread(_fetch_sync, arxiv_id)
-    return text, paper_title, paper_authors
+    text, paper_title, paper_authors, last_modified_date = await asyncio.to_thread(_fetch_sync, arxiv_id)
+    return text, paper_title, paper_authors, last_modified_date
 
 
-def _fetch_sync(arxiv_id: str) -> Tuple[str, str, List[str]]:
+def _fetch_sync(arxiv_id: str) -> Tuple[str, str, List[str], datetime]:
     """Download and extract text from arXiv paper"""
     # Create SSL context that doesn't verify certificates
     # This is needed on some Windows systems where certificate verification fails
@@ -72,7 +73,7 @@ def _fetch_sync(arxiv_id: str) -> Tuple[str, str, List[str]]:
         logger.info(f"Extracted {len(text)} characters from {pdf_path.name}")
         logger.info(f"Authors: {', '.join(author_names[:3])}...")
         
-        return text, paper.title, author_names
+        return text, paper.title, author_names, paper.updated
     
     finally:
         # Restore original urlopen

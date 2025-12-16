@@ -38,7 +38,7 @@ class SummarizerAgent:
                 return create_error_state(
                     "Summarization failed: No content available", 
                     "summarize", 
-                    summary="", 
+                    summary={},  # Changed to empty dict instead of empty string
                     summary_generated=False
                 )
             content = raw_text[:5000]
@@ -52,7 +52,7 @@ class SummarizerAgent:
             })
             logger.info(f"Generated summary: {summary}")
             return {
-                "summary": summary.model_dump_json(),
+                "summary": summary.model_dump(),  # Changed to model_dump() to return dict
                 "metadata": {
                     **state.get("metadata", {}),
                     "summary_generated": True
@@ -61,5 +61,5 @@ class SummarizerAgent:
 
         except Exception as e:
             logger.error(f"Failed to generate summary: {e}")
-            return create_error_state(f"Generate failed: {str(e)}", "generate", summary="", summary_generated=False)
+            return create_error_state(f"Generate failed: {str(e)}", "generate", summary={}, summary_generated=False)
             

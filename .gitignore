@@ -74,3 +74,12 @@ Thumbs.db
 fix_review.md
 full_analysis.md
 project_analysis.md
+DEPLOYMENT_GUIDE.md
+IMPLEMENTATION_GUIDE_MAIN_PY.md
+INFRASTRUCTURE_SETUP.md
+task.md
+test_all_health_checks.py
+test_database.py
+test_pinecone_health.py
+test_pinecone_operations.py
+test_pinecone_integration.py

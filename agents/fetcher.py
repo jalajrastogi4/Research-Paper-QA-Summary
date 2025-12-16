@@ -17,12 +17,13 @@ class FetcherAgent:
         try:
             from utils.arxiv_fetcher import fetch_arxiv_paper
 
-            text, title, authors = await fetch_arxiv_paper(state["arxiv_id"])
+            text, title, authors, last_modified_date = await fetch_arxiv_paper(state["arxiv_id"])
             logger.info(f"Fetched paper: {title}")
             return {
                 "raw_text": text,
                 "title": title,
                 "authors": authors,
+                "last_modified_date": last_modified_date,
                 "metadata": {
                     "fetched_at": datetime.now().isoformat(),
                     "status": "success"

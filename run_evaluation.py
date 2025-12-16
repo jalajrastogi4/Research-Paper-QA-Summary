@@ -10,7 +10,7 @@ import asyncio
 import json
 from datetime import datetime
 
-from main import ResearchAssistant
+from agents.research_agent_evaluate import ResearchAssistantEvaluate
 from tests.evaluate import AsyncEvaluator
 
 
@@ -21,7 +21,7 @@ async def main():
     print("="*80)
     
     print("\n[1/3] Initializing Research Assistant...")
-    assistant = ResearchAssistant()
+    assistant = ResearchAssistantEvaluate()
     
     print("\n[2/3] Initializing Evaluator...")
     evaluator = AsyncEvaluator()

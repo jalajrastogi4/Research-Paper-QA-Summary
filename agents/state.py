@@ -1,4 +1,5 @@
 from typing import TypedDict, List, Optional, Any, Dict
+from datetime import datetime
 
 class PaperState(TypedDict):
     arxiv_id: str
@@ -9,7 +10,12 @@ class PaperState(TypedDict):
     authors: Optional[List[str]]
     chunks: Optional[List[str]]
     sections: Optional[Dict[str, str]]
-    summary: Optional[str]
+    summary: Optional[Dict[str, Any]]  # Changed from str to Dict for structured data
+    abstract: Optional[str]
+
+    paper_cached: Optional[bool]
+    paper_current: Optional[bool]
+    last_modified_date: Optional[datetime]
 
     answer: Optional[str]
     citations: Optional[str]

@@ -69,7 +69,7 @@ def verification_prompt():
         logger.error(f"Failed to create verification prompt: {e}")
         raise RuntimeError(f"Failed to create verification prompt: {e}")
 
-# TODO: Add this new prompt function for Robust Parsing
+
 def parsing_prompt():
     try:
         prompt = ChatPromptTemplate.from_template("""
@@ -94,7 +94,7 @@ def parsing_prompt():
         logger.error(f"Failed to create parsing prompt: {e}")
         raise RuntimeError(f"Failed to create parsing prompt: {e}")
 
-# TODO: Add this prompt for Step 4: Hallucination Detection
+
 def claim_extraction_prompt():
     try:
         prompt = ChatPromptTemplate.from_template("""
@@ -111,7 +111,7 @@ def claim_extraction_prompt():
         logger.error(f"Failed to create claim extraction prompt: {e}")
         raise RuntimeError(f"Failed to create claim extraction prompt: {e}")
 
-# TODO: Add this prompt for Step 4: Hallucination Detection
+
 def nli_verification_prompt():
     try:
         prompt = ChatPromptTemplate.from_template("""
