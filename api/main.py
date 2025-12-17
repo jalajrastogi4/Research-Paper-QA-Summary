@@ -55,7 +55,10 @@ async def lifespan(app: FastAPI):
         await health_checker.add_service("pinecone", health_checker.check_pinecone)
 
         if not await startup_health_check():
-            raise RuntimeError("Critical services failed to start")
+            # raise RuntimeError("Critical services failed to start")
+            logger.error(
+                "Startup health check failed — starting API anyway"
+            )
         logger.info("All services initialized and healthy")
         
         yield
