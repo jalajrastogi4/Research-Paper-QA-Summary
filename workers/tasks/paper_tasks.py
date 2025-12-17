@@ -104,6 +104,10 @@ async def _process_paper_analysis(
             )
             await session.commit()
             raise
+        finally:
+            await db_manager.async_engine.dispose()
+            db_manager.async_engine = None
+            db_manager.async_session_factory = None
 
 
 
@@ -171,3 +175,7 @@ async def _process_evaluation(job_id: str, test_cases: Optional[List[Dict]] = No
             )
             await session.commit()
             raise
+        finally:
+            await db_manager.async_engine.dispose()
+            db_manager.async_engine = None
+            db_manager.async_session_factory = None

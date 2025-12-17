@@ -54,22 +54,24 @@ async def lifespan(app: FastAPI):
         await health_checker.add_service("redis", health_checker.check_redis)
         await health_checker.add_service("pinecone", health_checker.check_pinecone)
 
-        if not await startup_health_check():
-            # raise RuntimeError("Critical services failed to start")
-            logger.error(
-                "Startup health check failed — starting API anyway"
-            )
-        logger.info("All services initialized and healthy")
+        # if not await startup_health_check():
+        #     # raise RuntimeError("Critical services failed to start")
+        #     logger.error(
+        #         "Startup health check failed — starting API anyway"
+        #     )
+        # logger.info("All services initialized and healthy")
         
         yield
     except Exception as e:
         logger.error(f"Error initializing services: {e}")
-        await db_manager.async_engine.dispose()
+        if db_manager.async_engine is not None:
+            await db_manager.async_engine.dispose()
         await health_checker.cleanup()
         raise
     finally:
         logger.info("Shutting down database and services...")
-        await db_manager.async_engine.dispose()
+        if db_manager.async_engine is not None:
+            await db_manager.async_engine.dispose()
         await health_checker.cleanup()
 
 

@@ -26,6 +26,8 @@ class DatabaseManager:
         """
         Initialize the async engine and session factory.
         """
+        if self.async_engine is not None:
+            return
         try:
             self.async_engine = create_async_engine(
                 settings.database_url_async_path,
@@ -69,7 +71,7 @@ class DatabaseManager:
 
 
 db_manager = DatabaseManager()
-db_manager.initialize()
+# db_manager.initialize()
 
 
 async def init_db() -> None:
@@ -77,7 +79,7 @@ async def init_db() -> None:
     Initialize the database.
     """
     try:
-        
+        db_manager.initialize()
         logger.info("Loading Models and creating tables...")
         await db_manager.create_tables()
 
@@ -106,6 +108,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """
     Get async session for the database for dependency in Fastapi.
     """
+    db_manager.initialize()
     session = db_manager.async_session_factory()
     try:
         yield session
