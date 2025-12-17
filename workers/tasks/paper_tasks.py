@@ -67,6 +67,7 @@ async def _process_paper_analysis(
     """
     Celery based async implementation of paper analysis with job status updates.
     """
+    db_manager.initialize()
     async with db_manager.async_session_factory() as session:
         try:
             paper_service = PaperService(session)
