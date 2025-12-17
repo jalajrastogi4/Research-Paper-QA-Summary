@@ -1,9 +1,10 @@
-import nest_asyncio
-nest_asyncio.apply()
+# import nest_asyncio
+# nest_asyncio.apply()
 
 from celery import Task
 from typing import Dict, Any, List, Optional
 from uuid import uuid4
+import asyncio
 
 from workers.celery_config import celery_app
 from api.services.paper_service import PaperService
@@ -13,6 +14,21 @@ from core.db import db_manager
 from core.logging import get_logger
 
 logger = get_logger()
+
+
+def run_async(coro):
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop is not None and loop.is_running():
+        raise RuntimeError(
+            "Celery task is running inside an active event loop. "
+            "Async Celery pools are not supported with this setup."
+        )
+
+    return asyncio.run(coro)
 
 
 @celery_app.task(bind=True, name="analyze_paper", queue="paper_analysis")
@@ -27,8 +43,16 @@ def analyze_paper(
     Celery task wrapper fpr Paper Q&A.
     """
     try:
-        import asyncio
-        return asyncio.run(_process_paper_analysis(job_id, arxiv_id, question, use_cache))
+        # import asyncio
+        return run_async(
+            _process_paper_analysis(
+                job_id=job_id,
+                arxiv_id=arxiv_id,
+                question=question,
+                use_cache=use_cache
+            )
+        )
+        # return asyncio.run(_process_paper_analysis(job_id, arxiv_id, question, use_cache))
     except Exception as e:
         logger.error(f"Q&A failed for job {job_id}: {str(e)}")
         raise
@@ -93,8 +117,14 @@ def evaluate_research_agent(
     Celery task wrapper fpr Agent Evaluation.
     """
     try:
-        import asyncio
-        return asyncio.run(_process_evaluation(job_id, test_cases))
+        # import asyncio
+        return run_async(
+            _process_evaluation(
+                job_id=job_id,
+                test_cases=test_cases
+            )
+        )
+        # return asyncio.run(_process_evaluation(job_id, test_cases))
     except Exception as e:
         logger.error(f"Evaluation failed for job {job_id}: {str(e)}")
         raise
