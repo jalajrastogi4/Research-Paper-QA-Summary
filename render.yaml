@@ -76,7 +76,7 @@ services:
       
       # Storage (using Render persistent disk)
       - key: ARXIV_DIR
-        value: /var/data/arxiv_papers
+        value: /var/data/arxiv
       - key: RENDER_DISK_PATH
         value: /var/data
 
@@ -156,7 +156,7 @@ services:
       
       # Storage (using Render persistent disk)
       - key: ARXIV_DIR
-        value: /var/data/arxiv_papers
+        value: /var/data/arxiv
       - key: RENDER_DISK_PATH
         value: /var/data
 
