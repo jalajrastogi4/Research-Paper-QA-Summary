@@ -35,6 +35,7 @@ class PaperService:
         logger.info(f"[{job_id}] Starting paper analysis for {arxiv_id}")
         
         try:
+            last_modified_date = None
             if use_cache:
                 paper = await get_paper_by_arxiv_id(self.session, arxiv_id)
                 cached_qa = await self.cache_service.check_qa_cache(self.session, arxiv_id, question)
@@ -42,10 +43,12 @@ class PaperService:
                 if cached_qa:
                     logger.info(f"[{job_id}] QA cache HIT for {arxiv_id}")
                     logger.info(f"[DEBUG] Returning cached result {cached_qa}")
+                    if not paper:
+                        logger.warning(f"Paper NOT found for {arxiv_id} when {cached_qa} EXISTS - INTEGRITY CHECK REQUIRED. FK CONSTRAINT may NOT be enforced")
                     return {
                         **cached_qa,
-                        "title": paper.title,
-                        "authors": paper.authors,
+                        "title": paper.title if paper else "Unknown",
+                        "authors": paper.authors if paper else [],
                         "job_id": job_id,
                     }
 
@@ -78,6 +81,9 @@ class PaperService:
 
                 logger.info(f"[{job_id}] Paper cache MISS for {arxiv_id} - Running full pipeline")
             
+            if last_modified_date is None:
+                from utils.arxiv_fetcher import fetch_arxiv_paper
+                _, _, _, last_modified_date = await fetch_arxiv_paper(arxiv_id)
             research_assistant = ResearchAssistant(self.session)
             result = await research_assistant.run(arxiv_id, question)
             await self.cache_service.store_paper_result(

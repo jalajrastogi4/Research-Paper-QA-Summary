@@ -40,6 +40,28 @@ class CacheLoaderAgent:
         logger.info(f"Checking cache for paper: {arxiv_id}")
         
         try:
+            if state.get("error"):
+                logger.error(f"Upstream error detected in cache_loader for {arxiv_id}: {state['error']}")
+                return {
+                    "paper_cached": False,
+                    "paper_current": False,
+                    "metadata": {
+                        **state.get("metadata", {}),
+                        "cache_check_error": state.get("error")
+                    }
+                }
+
+            if not state.get("last_modified_date"):
+                logger.error(f"Missing last_modified_date in state for {arxiv_id}")
+                return {
+                    "paper_cached": False,
+                    "paper_current": False,
+                    "metadata": {
+                        **state.get("metadata", {}),
+                        "cache_check_error": "Missing last_modified_date in state"
+                    }
+                }
+
             paper = await get_paper_by_arxiv_id(self.session, arxiv_id)
             if not paper:
                 return {
