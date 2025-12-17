@@ -138,6 +138,7 @@ async def _process_evaluation(job_id: str, test_cases: Optional[List[Dict]] = No
     """
     Celery based async implementation of Agent Evaluation.
     """
+    db_manager.initialize()
     async with db_manager.async_session_factory() as session:
         try:
             evaluation_service = EvaluationService()
