@@ -26,3 +26,8 @@ async def health_check() -> HealthCheckResponse:
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.get("/render-health")
+async def render_health_check():
+    return {"status": "ok"}
