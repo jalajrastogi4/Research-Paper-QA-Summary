@@ -1,0 +1,179 @@
+services:
+  # =============================================================================
+  # FastAPI Web Service
+  # =============================================================================
+  - type: web
+    name: langgraph-api
+    runtime: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT --workers 2
+    healthCheckPath: /health
+    envVars:
+      # Database
+      - key: DATABASE_URL
+        sync: false
+      
+      # Redis & Celery
+      - key: REDIS_URL
+        sync: false
+      - key: CELERY_BROKER_URL
+        sync: false
+      - key: CELERY_RESULT_BACKEND_URL
+        sync: false
+      
+      # Vector Store
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: PINECONE_INDEX_NAME
+        value: research-papers
+      - key: PINECONE_ENVIRONMENT
+        value: us-east-1
+      
+      # LLM & Embeddings
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: gpt-4-turbo
+      - key: EMBEDDINGS_MODEL
+        value: text-embedding-3-small
+      
+      # Langfuse (Observability)
+      - key: LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: LANGFUSE_SECRET_KEY
+        sync: false
+      - key: LANGFUSE_BASE_URL
+        value: https://cloud.langfuse.com
+      
+      # Application Settings
+      - key: CHUNK_SIZE
+        value: 1000
+      - key: CHUNK_OVERLAP
+        value: 200
+      - key: TOP_K_CHUNKS
+        value: 3
+      
+      # Hallucination Detection Weights
+      - key: CITATION_SCORE
+        value: 0.4
+      - key: LLM_SCORE
+        value: 0.3
+      - key: CONSISTENCY_SCORE
+        value: 0.3
+      
+      # Database Connection Pool
+      - key: DB_POOL_SIZE
+        value: 5
+      - key: DB_MAX_OVERFLOW
+        value: 10
+      - key: DB_POOL_RECYCLE
+        value: 3600
+      - key: DB_POOL_TIMEOUT
+        value: 30
+      
+      # Storage (using Render persistent disk)
+      - key: ARXIV_DIR
+        value: /var/data/arxiv_papers
+      - key: RENDER_DISK_PATH
+        value: /var/data
+
+  # =============================================================================
+  # Celery Worker Service
+  # =============================================================================
+  - type: worker
+    name: langgraph-worker
+    runtime: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A workers.celery_config.celery_app worker --loglevel=info --pool=solo -Q paper_analysis,celery
+    envVars:
+      # Database
+      - key: DATABASE_URL
+        sync: false
+      
+      # Redis & Celery
+      - key: REDIS_URL
+        sync: false
+      - key: CELERY_BROKER_URL
+        sync: false
+      - key: CELERY_RESULT_BACKEND_URL
+        sync: false
+      
+      # Vector Store
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: PINECONE_INDEX_NAME
+        value: research-papers
+      - key: PINECONE_ENVIRONMENT
+        value: us-east-1
+      
+      # LLM & Embeddings
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: gpt-4-turbo
+      - key: EMBEDDINGS_MODEL
+        value: text-embedding-3-small
+      
+      # Langfuse (Observability)
+      - key: LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: LANGFUSE_SECRET_KEY
+        sync: false
+      - key: LANGFUSE_BASE_URL
+        value: https://cloud.langfuse.com
+      
+      # Application Settings
+      - key: CHUNK_SIZE
+        value: 1000
+      - key: CHUNK_OVERLAP
+        value: 200
+      - key: TOP_K_CHUNKS
+        value: 3
+      
+      # Hallucination Detection Weights
+      - key: CITATION_SCORE
+        value: 0.4
+      - key: LLM_SCORE
+        value: 0.3
+      - key: CONSISTENCY_SCORE
+        value: 0.3
+      
+      # Database Connection Pool
+      - key: DB_POOL_SIZE
+        value: 5
+      - key: DB_MAX_OVERFLOW
+        value: 10
+      - key: DB_POOL_RECYCLE
+        value: 3600
+      - key: DB_POOL_TIMEOUT
+        value: 30
+      
+      # Storage (using Render persistent disk)
+      - key: ARXIV_DIR
+        value: /var/data/arxiv_papers
+      - key: RENDER_DISK_PATH
+        value: /var/data
+
+  # =============================================================================
+  # Flower Monitoring Service (Optional - comment out if not needed)
+  # =============================================================================
+  # - type: web
+  #   name: langgraph-flower
+  #   runtime: python
+  #   region: oregon
+  #   plan: starter
+  #   branch: main
+  #   buildCommand: pip install -r requirements.txt
+  #   startCommand: celery -A workers.celery_config.celery_app flower --port=$PORT --broker=$CELERY_BROKER_URL
+  #   envVars:
+  #     - key: CELERY_BROKER_URL
+  #       sync: false
+  #     - key: CELERY_RESULT_BACKEND_URL
+  #       sync: false
+
