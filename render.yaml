@@ -79,6 +79,8 @@ services:
         value: /var/data/arxiv
       - key: RENDER_DISK_PATH
         value: /var/data
+      - key: LOGS_DIR
+        value: /var/data/logs
 
   # =============================================================================
   # Celery Worker Service
@@ -159,6 +161,8 @@ services:
         value: /var/data/arxiv
       - key: RENDER_DISK_PATH
         value: /var/data
+      - key: LOGS_DIR
+        value: /var/data/logs
 
   # =============================================================================
   # Flower Monitoring Service (Optional - comment out if not needed)
