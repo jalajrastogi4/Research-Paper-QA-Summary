@@ -16,9 +16,13 @@ class PaperState(TypedDict):
     paper_cached: Optional[bool]
     paper_current: Optional[bool]
     last_modified_date: Optional[datetime]
+    skip_vectorstore: Optional[bool]
+    delete_old_embeddings: Optional[bool]
+
 
     answer: Optional[str]
     citations: Optional[str]
+    chunk_citations: Optional[List[int]]
     retrieved_chunks: Optional[List[Dict[str, Any]]]
 
     hallucination_check: Optional[Dict[str, Any]]

@@ -71,10 +71,26 @@ class CacheLoaderAgent:
                 
             is_current = paper.last_modified_date >= state["last_modified_date"]
 
-            return {
-                "paper_cached": True,
-                "paper_current": is_current
-            }
+            if paper.vector_store_status == "completed" and is_current:
+                return {
+                    "paper_cached": True,
+                    "paper_current": is_current,
+                    "skip_vectorstore": True
+                }
+            elif paper.vector_store_status == "completed" and not is_current:
+                return {
+                    "paper_cached": True,
+                    "paper_current": is_current,
+                    "skip_vectorstore": False,
+                    "delete_old_embeddings": True,
+                }
+            else:
+                return {
+                    "paper_cached": True,
+                    "paper_current": is_current,
+                    "skip_vectorstore": False,
+                    "delete_old_embeddings": False,
+                }
             
         except Exception as e:
             logger.error(f"Error checking cache for {arxiv_id}: {e}")

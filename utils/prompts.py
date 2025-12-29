@@ -28,17 +28,26 @@ def qa_prompt():
         prompt = ChatPromptTemplate.from_template("""
         Answer the question based on the research paper context.
         You MUST cite specific sections or page numbers where possible.
+        You MUST ALSO cite the specific chunks you used
         
         Question: {question}
         
         Context from paper:
         {context}
         
-        Format your answer as:
-        Answer: [your answer]
-        Citations: [section/page references, or "Not explicitly stated in paper"]
+        Format your answer as JSON:
+        {{
+            "answer": "your answer",
+            "citations": "section/page references or 'Not explicitly stated in paper'",
+            "chunk_citations": [0, 2, 5]
+        }}
+
+        Where:
+        - answer: Your answer to the question
+        - citations: Human-readable references like "Section 3.1", "Abstract", or "Figure 2" and if no references are found then use 'Not explicitly stated in paper'
+        - chunk_citations: List of integers representing chunk indices you used (e.g., [0, 2, 5])
         
-        If the question cannot be answered from the context, say so.
+        If the question cannot be answered from the context, say so and use empty list for chunk_citations.
         """)
         return prompt
     except Exception as e:
@@ -133,3 +142,32 @@ def nli_verification_prompt():
     except Exception as e:
         logger.error(f"Failed to create NLI prompt: {e}")
         raise RuntimeError(f"Failed to create NLI prompt: {e}")
+
+
+def batch_nli_verification_prompt():
+    try:
+        prompt = ChatPromptTemplate.from_template("""
+            Verify if the list of claims are supported by the context.
+            
+            Context:
+            {context}
+            
+            Claims:
+            {claims}
+            
+            For EACH claim listed above, verify it against the context.
+            Return a JSON array with one object per claim.
+            
+            Return format:
+            [
+                {{"claim": "first claim text", "verdict": "SUPPORTED" | "CONTRADICTED" | "NOT_MENTIONED", "explanation": "brief reason"}},
+                {{"claim": "second claim text", "verdict": "SUPPORTED" | "CONTRADICTED" | "NOT_MENTIONED", "explanation": "brief reason"}},
+                {{"claim": "third claim text", "verdict": "SUPPORTED" | "CONTRADICTED" | "NOT_MENTIONED", "explanation": "brief reason"}}
+            ]
+            
+            Note: The array length must match the number of claims provided.
+        """)
+        return prompt
+    except Exception as e:
+        logger.error(f"Failed to create batch NLI verification prompt: {e}")
+        raise RuntimeError(f"Failed to create batch NLI verification prompt: {e}")

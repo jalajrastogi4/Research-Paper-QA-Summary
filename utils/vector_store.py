@@ -1,12 +1,3 @@
-"""
-Vector store manager using Pinecone for embeddings storage.
-
-Migrated from ChromaDB to Pinecone for:
-- Better scalability
-- No persistent disk requirements
-- Managed infrastructure
-"""
-
 from typing import List, Dict, Any
 from pinecone import Pinecone, ServerlessSpec
 
@@ -18,22 +9,14 @@ logger = get_logger()
 
 
 class VectorStoreManager:
-    """
-    Manages vector embeddings using Pinecone.
-    
-    Each paper gets its own namespace within a single Pinecone index.
-    """
-    
+       
     def __init__(self):
-        """Initialize Pinecone client and index."""
         self.pc = Pinecone(api_key=settings.PINECONE_API_KEY)
         self.index_name = settings.PINECONE_INDEX_NAME
         self.embeddings = llm_model.get_embeddings()
         
-        # Create index if it doesn't exist
         self._ensure_index_exists()
         
-        # Connect to the index
         self.index = self.pc.Index(self.index_name)
         logger.info(f"Connected to Pinecone index: {self.index_name}")
     
@@ -46,7 +29,7 @@ class VectorStoreManager:
                 logger.info(f"Creating Pinecone index: {self.index_name}")
                 self.pc.create_index(
                     name=self.index_name,
-                    dimension=1536,  # OpenAI text-embedding-3-small dimension
+                    dimension=1536,  
                     metric="cosine",
                     spec=ServerlessSpec(
                         cloud="aws",
@@ -72,17 +55,15 @@ class VectorStoreManager:
             Number of vectors upserted
         """
         try:
-            # Generate embeddings for all chunks
+            
             logger.info(f"Generating embeddings for {len(chunks)} chunks...")
             embeddings = self.embeddings.embed_documents(chunks)
             
-            # Prepare vectors for upsert
             vectors = []
             for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
                 vector_id = f"{arxiv_id}_{i}"
                 
-                # Pinecone metadata has a size limit (~40KB), truncate to 10,000 chars to be safe
-                # This allows full chunk storage even with overlap
+
                 truncated_text = chunk[:10000] if len(chunk) > 10000 else chunk
                 
                 vectors.append({
@@ -97,7 +78,6 @@ class VectorStoreManager:
                     }
                 })
             
-            # Upsert vectors in batches of 100 (Pinecone recommendation)
             batch_size = 100
             total_upserted = 0
             
@@ -105,7 +85,7 @@ class VectorStoreManager:
                 batch = vectors[i:i + batch_size]
                 self.index.upsert(
                     vectors=batch,
-                    namespace=arxiv_id  # Each paper gets its own namespace
+                    namespace=arxiv_id
                 )
                 total_upserted += len(batch)
                 logger.info(f"Upserted batch {i//batch_size + 1}: {len(batch)} vectors")
@@ -135,10 +115,8 @@ class VectorStoreManager:
             List of dicts with content, metadata, and relevance_score
         """
         try:
-            # Generate query embedding
             query_embedding = self.embeddings.embed_query(query)
             
-            # Query Pinecone
             results = self.index.query(
                 vector=query_embedding,
                 top_k=k,
@@ -146,7 +124,6 @@ class VectorStoreManager:
                 include_metadata=True
             )
             
-            # Format results
             relevant_chunks = []
             for match in results.matches:
                 relevant_chunks.append({

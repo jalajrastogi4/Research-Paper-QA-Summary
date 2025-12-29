@@ -2,11 +2,18 @@ import re
 from typing import List, Dict, Any
 from difflib import SequenceMatcher
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+from sentence_transformers import SentenceTransformer, util
 
 from agents.qa_agent import PaperState
 from utils.llm import llm_model
-from utils.prompts import verification_prompt, claim_extraction_prompt, nli_verification_prompt
+from utils.prompts import (
+    verification_prompt, 
+    claim_extraction_prompt, 
+    nli_verification_prompt, 
+    batch_nli_verification_prompt
+    )
 from utils.vector_store import VectorStoreManager
+from utils.tracing import get_langfuse_handler
 from core.config import settings
 from core.logging import get_logger
 
@@ -19,59 +26,86 @@ class HallucinationDetector:
         self.verification_prompt = verification_prompt()
         self.claim_prompt = claim_extraction_prompt()
         self.nli_prompt = nli_verification_prompt()
+        self.batch_nli_prompt = batch_nli_verification_prompt()
+        self.similarity_model = SentenceTransformer('all-MiniLM-L6-v2')
+
+    def _semantic_cross_check(self, ans1: str, ans2: str) -> float:
+        emb1 = self.similarity_model.encode(ans1, convert_to_tensor=True)
+        emb2 = self.similarity_model.encode(ans2, convert_to_tensor=True)
+        
+        return util.pytorch_cos_sim(emb1, emb2).item()
 
     async def verify_citations(self, state: PaperState) -> PaperState:
         """Citation verification"""
         citations = state.get("citations", "")
         text = state["raw_text"]
+        chunk_citations = state.get("chunk_citations", [])
         retrieved_chunks = state.get("retrieved_chunks", [])
+
+        valid_indices = {c.get("metadata", {}).get("chunk_index", -999) for c in retrieved_chunks}
 
         verification_results = []
 
-        section_patterns = r'(?:section|sec\.?|§)\s*(\d+(?:\.\d+)*)'
-        section_matches = re.finditer(section_patterns, citations, re.IGNORECASE)
-
-        page_patterns = r'(?:p\.|pp\.|page)\s*(\d+(?:\s*[–-]\s*\d+)?)'
-        page_matches = re.finditer(page_patterns, citations, re.IGNORECASE)
-
-        figure_pattern = r'(?:fig\.|figure|table|tbl\.)\s*(\d+(?:\.\d+)*)'
-        figure_matches = re.finditer(figure_pattern, citations, re.IGNORECASE)
-
-        all_matches = list(section_matches) + list(page_matches) + list(figure_matches)
-
-        for curr_match in all_matches:
-            ref = curr_match.group(1)
-            ref_type = curr_match.group(0).split('.')[0].lower() if '.' in curr_match.group(0) else curr_match.group(0).lower()
-
-            found = False
-            confidence = 'low'
-
-            if ref and re.search(rf'\b{re.escape(ref)}\b', text, re.IGNORECASE):
-                found = True
-                confidence = "medium"
-
-            for chunk in retrieved_chunks:
-                chunk_content = chunk.get("content", "").lower()
-                if ref and ref.lower() in chunk_content:
-                    found = True
-                    confidence = "high"
-                    break
-
+        for idx in chunk_citations:
+            is_valid = idx in valid_indices and idx != -999
             verification_results.append({
-                "reference": f"{ref_type} {ref}",
-                "found": found,
-                "confidence": confidence,
-                "type": ref_type
+                "reference": f"Chunk {idx}",
+                "found": is_valid,
+                "confidence": "high" if is_valid else "invalid"
             })
 
-        hallucination_score = 0
-        if verification_results:
-            unfound_count = sum(1 for r in verification_results if not r["found"])
-            hallucination_score = unfound_count / len(verification_results)
+        # section_patterns = r'(?:section|sec\.?|§)\s*(\d+(?:\.\d+)*)'
+        # section_matches = re.finditer(section_patterns, citations, re.IGNORECASE)
 
-        citation_present = bool(citations and citations.lower() not in ["not provided", "none", "no citations", "no relevant sections", "not explicitly stated in paper"])
-        if not citation_present and state.get("answer", ""):
-            hallucination_score = max(hallucination_score, 0.7)
+        # page_patterns = r'(?:p\.|pp\.|page)\s*(\d+(?:\s*[–-]\s*\d+)?)'
+        # page_matches = re.finditer(page_patterns, citations, re.IGNORECASE)
+
+        # figure_pattern = r'(?:fig\.|figure|table|tbl\.)\s*(\d+(?:\.\d+)*)'
+        # figure_matches = re.finditer(figure_pattern, citations, re.IGNORECASE)
+
+        # all_matches = list(section_matches) + list(page_matches) + list(figure_matches)
+
+        # for curr_match in all_matches:
+        #     ref = curr_match.group(1)
+        #     ref_type = curr_match.group(0).split('.')[0].lower() if '.' in curr_match.group(0) else curr_match.group(0).lower()
+
+        #     found = False
+        #     confidence = 'low'
+
+        #     if ref and re.search(rf'\b{re.escape(ref)}\b', text, re.IGNORECASE):
+        #         found = True
+        #         confidence = "medium"
+
+        #     for chunk in retrieved_chunks:
+        #         chunk_content = chunk.get("content", "").lower()
+        #         if ref and ref.lower() in chunk_content:
+        #             found = True
+        #             confidence = "high"
+        #             break
+
+        #     verification_results.append({
+        #         "reference": f"{ref_type} {ref}",
+        #         "found": found,
+        #         "confidence": confidence,
+        #         "type": ref_type
+        #     })
+
+        if not chunk_citations:
+            hallucination_score = 0.5
+            citation_present = False
+        else:
+            unfound_count = sum(1 for r in verification_results if not r["found"])
+            hallucination_score = unfound_count / len(chunk_citations)
+            citation_present = True
+
+        # hallucination_score = 0
+        # if verification_results:
+        #     unfound_count = sum(1 for r in verification_results if not r["found"])
+        #     hallucination_score = unfound_count / len(verification_results)
+
+        # citation_present = bool(citations and citations.lower() not in ["not provided", "none", "no citations", "no relevant sections", "not explicitly stated in paper"])
+        # if not citation_present and state.get("answer", ""):
+        #     hallucination_score = max(hallucination_score, 0.7)
 
         return {
             "hallucination_check": {
@@ -100,22 +134,37 @@ class HallucinationDetector:
             }
 
         context = "\n".join([c.get("content", "") for c in retrieved_chunks])
+        claim_handler = get_langfuse_handler("claim_extraction", {"arxiv_id": state["arxiv_id"]})
 
         claims_chain = self.claim_prompt | self.llm | JsonOutputParser()
         nli_chain = self.nli_prompt | self.llm | JsonOutputParser()
         verifications = []
 
         try:
-            claims = await claims_chain.ainvoke({"answer": answer})
+            claims = await claims_chain.ainvoke({"answer": answer}, config={"callbacks": [claim_handler]})
             logger.info(f"Extracted claims: {claims}")
-            for claim in claims:
-                nli_result = await nli_chain.ainvoke({"claim": claim, "context": context})
-                logger.info(f"NLI result: {nli_result}")
+
+            nli_handler = get_langfuse_handler("batch_nli_verification", {"claim_count": len(claims), "arxiv_id": state["arxiv_id"]})
+            batch_nli_chain = self.batch_nli_prompt | self.llm | JsonOutputParser()
+            claims_text = "\n".join([f"{i+1}. {claim}" for i, claim in enumerate(claims)])
+            batch_results = await batch_nli_chain.ainvoke(
+                {"context": context, "claims": claims_text},
+                config={"callbacks": [nli_handler]}
+                )
+            for result in batch_results:
                 verifications.append({
-                    "claim": claim,
-                    "verdict": nli_result["verdict"],
-                    "explanation": nli_result["explanation"]
+                    "claim": result["claim"],
+                    "verdict": result["verdict"],
+                    "explanation": result["explanation"]
                 })
+            # for claim in claims:
+            #     nli_result = await nli_chain.ainvoke({"claim": claim, "context": context})
+            #     logger.info(f"NLI result: {nli_result}")
+            #     verifications.append({
+            #         "claim": claim,
+            #         "verdict": nli_result["verdict"],
+            #         "explanation": nli_result["explanation"]
+            #     })
             
             supported_count = sum(1 for v in verifications if v["verdict"] == "SUPPORTED")
             llm_hallucination_score = 1 - (supported_count / len(verifications)) if verifications else 0.5
@@ -162,7 +211,7 @@ class HallucinationDetector:
 
         variation_state = {
             "question": state["question"],
-            "retrieved_chunks": retrieved_chunks[:1]
+            "retrieved_chunks": retrieved_chunks
         }
 
         try:
@@ -195,7 +244,7 @@ class HallucinationDetector:
         similarities = []
         for i in range(len(valid_answers)):
             for j in range(i + 1, len(valid_answers)):
-                sim = SequenceMatcher(None, valid_answers[i].lower(), valid_answers[j].lower()).ratio()
+                sim = self._semantic_cross_check(valid_answers[i], valid_answers[j])
                 similarities.append(sim)
 
         avg_similarity = sum(similarities) / len(similarities) if similarities else 0
