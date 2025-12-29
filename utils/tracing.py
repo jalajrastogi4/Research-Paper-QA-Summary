@@ -1,4 +1,4 @@
-from langfuse import CallbackHandler
+from langfuse.langchain import CallbackHandler
 from core.config import settings
 
 def get_langfuse_handler(trace_name: str, metadata: dict = None):
