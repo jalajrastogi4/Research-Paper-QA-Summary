@@ -60,7 +60,7 @@ class QAAgent:
     async def generate_answer(self, state: PaperState) -> PaperState:
         """Generate answer with citations"""
         retrieved_chunks = state.get("retrieved_chunks", [])
-        handler = get_langfuse_handler("generate_answer", {"arxiv_id": state["arxiv_id"]})
+        handler = get_langfuse_handler()
         if not retrieved_chunks:
             return {
                 "answer": "Could not find relevant information in the paper.",
@@ -90,7 +90,11 @@ class QAAgent:
                     "question": state["question"],
                     "context": context
                 }, 
-                config={"callbacks": [handler]}
+                config={
+                    "callbacks": [handler],
+                    "tags": ["generate_answer"],
+                    "metadata": {"arxiv_id": state["arxiv_id"]}
+                }
             )
             
             # answer_match = re.search(r"Answer:\s*(.*?)(?=\n*Citations:|$)", response, re.DOTALL)

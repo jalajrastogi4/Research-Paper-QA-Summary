@@ -38,6 +38,7 @@ class ResearchAssistantEvaluate:
         self.workflow.add_node("retrieve_context", self.qa.retrieve_context)
         self.workflow.add_node("generate_answer", self.qa.generate_answer)
         self.workflow.add_node("check_hallucination", self.detector.verify_citations)
+        self.workflow.add_node("verify_claims", self.detector.verify_claims_with_nli)
         self.workflow.add_node("check_consistency", self.detector.cross_check_answer)
         self.workflow.add_node("comprehensive_check", self.detector.comprehensive_check)
 
@@ -48,7 +49,8 @@ class ResearchAssistantEvaluate:
         self.workflow.add_edge("store_vector", "retrieve_context")
         self.workflow.add_edge("retrieve_context", "generate_answer")
         self.workflow.add_edge("generate_answer", "check_hallucination")
-        self.workflow.add_edge("check_hallucination", "check_consistency")
+        self.workflow.add_edge("check_hallucination", "verify_claims")
+        self.workflow.add_edge("verify_claims", "check_consistency")
         self.workflow.add_edge("check_consistency", "comprehensive_check")
         self.workflow.add_edge("comprehensive_check", END)
 

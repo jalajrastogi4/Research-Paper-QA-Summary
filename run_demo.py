@@ -5,6 +5,7 @@ import asyncio
 import json
 from datetime import datetime
 from agents.research_agent_evaluate import ResearchAssistantEvaluate
+import time
 
 async def run_demo():
     """Run demo on sample paper"""
@@ -18,8 +19,8 @@ async def run_demo():
     
     # Test paper - using well-known Transformer paper
     test_paper = {
-        "arxiv_id": "1706.03762",  # Attention Is All You Need
-        "question": "What is the main contribution of the Transformer architecture?"
+        "arxiv_id": "1810.04805",  # Attention Is All You Need
+        "question": "What pre-training tasks does BERT use and why are they effective?"
     }
     
     print(f"\n[2/3] Processing Paper: {test_paper['arxiv_id']}")
@@ -27,6 +28,7 @@ async def run_demo():
     print("-" * 80)
     
     try:
+        start_time = time.time()
         result = await assistant.run(
             arxiv_id=test_paper['arxiv_id'],
             question=test_paper['question']
@@ -53,6 +55,10 @@ async def run_demo():
             check = result["consistency_check"]
             print(f" Answer Consistency: {check.get('average_similarity', 0):.2%})")
         
+
+        end_time = time.time()
+        duration = end_time - start_time
+        print(f"\n Time taken: {duration:.2f} seconds")
         # Save result
         print(f"\n[3/3] Saving results...")
         demo_result = {
@@ -62,9 +68,13 @@ async def run_demo():
             "answer": result.get('answer'),
             "citations": result.get('citations'),
             "hallucination_score": result.get('hallucination_check', {}).get('score', 0),
+            "llm_claim_verification_score": result.get('llm_verification', {}).get('hallucination_score', 0),
             "consistency": result.get('consistency_check', {}).get('average_similarity', 0),
-            "metadata": result.get('metadata', {})
+            "comprehensive_hallucination_check": result.get("comprehensive_hallucination_check", {}),
+            "metadata": result.get('metadata', {}),
+            "duration": duration
         }
+        
         
         output_file = f"demo_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(output_file, 'w') as f:

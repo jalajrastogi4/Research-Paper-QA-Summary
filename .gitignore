@@ -66,6 +66,8 @@ coverage.xml
 demo_results_*.json
 evaluation_results_*.json
 *.pdf
+!demo_results_20260101_135354.json
+!evaluation_results_20251207_150517.json
 
 # OS
 Thumbs.db

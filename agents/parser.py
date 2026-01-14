@@ -7,6 +7,7 @@ from typing import Dict
 from agents.state import PaperState, create_error_state 
 from utils.llm import llm_model
 from utils.prompts import parsing_prompt
+from utils.tracing import get_langfuse_handler
 from core.config import settings
 from core.logging import get_logger
 
@@ -20,11 +21,19 @@ class ParserAgent:
         self.parsing_prompt = parsing_prompt()
 
 
-    async def _identify_sections_with_llm(self, text: str) -> Dict[str, str]:
+    async def _identify_sections_with_llm(self, text: str, arxiv_id: str = "unknown") -> Dict[str, str]:
         """Identify section start strings using LLM"""
         chain = self.parsing_prompt | self.llm | JsonOutputParser()
+        handler = get_langfuse_handler()
         try:
-            response = await chain.ainvoke({"text_start": text})
+            response = await chain.ainvoke(
+                {"text_start": text},
+                config={
+                    "callbacks": [handler],
+                    "tags": ["parse_sections"],
+                    "metadata": {"arxiv_id": arxiv_id}
+                }
+            )
             logger.info(f"Sections identified with LLM: {response}")
             return response
         except Exception as e:
@@ -45,7 +54,7 @@ class ParserAgent:
             raw_text = state["raw_text"]
             text_start = raw_text[:settings.SECTION_PARSER_LIMIT]
 
-            response = await self._identify_sections_with_llm(text_start)
+            response = await self._identify_sections_with_llm(text_start, state["arxiv_id"])
 
             section_names = ["abstract", "introduction", "methodology", "results", "conclusion"]
 

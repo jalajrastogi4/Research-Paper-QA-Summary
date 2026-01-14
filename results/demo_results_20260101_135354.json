@@ -1,0 +1,118 @@
+{
+  "arxiv_id": "1810.04805",
+  "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+  "question": "What pre-training tasks does BERT use and why are they effective?",
+  "answer": "BERT uses two pre-training tasks: Masked Language Model (MLM) and Next Sentence Prediction (NSP). These tasks are effective because they allow the model to understand both the context of words and the relationships between sentences, which are crucial for handling a wide range of downstream tasks such as question answering and language inference.",
+  "citations": "Not explicitly stated in paper",
+  "hallucination_score": 0.0,
+  "llm_claim_verification_score": 1.0,
+  "consistency": 0.9866780042648315,
+  "comprehensive_hallucination_check": {
+    "overall_score": 0.4026643991470337,
+    "overall_risk": "MEDIUM",
+    "component_scores": {
+      "citation_verification": 0.0,
+      "llm_verification": 1.0,
+      "consistency_check": 0.013321995735168457
+    },
+    "citation_details": {
+      "score": 0.0,
+      "verified_citations": [],
+      "citation_present": false,
+      "status": "low_risk",
+      "metadata": {
+        "fetched_at": "2026-01-01T13:52:58.147064",
+        "status": "success",
+        "chunk_count": 81,
+        "avg_chunk_length": 967.7777777777778,
+        "summary_generated": true,
+        "vector_store_created": true,
+        "vector_count": 81,
+        "chunks_retrieved": 3,
+        "avg_relevance_score": 0.6663579943333334,
+        "retrieval_method": "vector_similarity",
+        "answer_generated": true,
+        "chunks_used": [
+          6.0,
+          12.0,
+          43.0
+        ],
+        "chunk_relevance_scores": [
+          0.673471451,
+          0.671416283,
+          0.654186249
+        ],
+        "hallucination_score": 0.0,
+        "citations_verified": 0
+      }
+    },
+    "llm_details": {
+      "verifications": [
+        {
+          "claim": "BERT uses two pre-training tasks: Masked Language Model (MLM) and Next Sentence Prediction (NSP).",
+          "verdict": "NOT_MENTIONED",
+          "explanation": "The context does not explicitly mention the specific pre-training tasks used by BERT, such as Masked Language Model (MLM) and Next Sentence Prediction (NSP)."
+        },
+        {
+          "claim": "These tasks help the model understand the context of words and the relationships between sentences.",
+          "verdict": "NOT_MENTIONED",
+          "explanation": "The context does not discuss how the pre-training tasks help BERT understand the context of words or the relationships between sentences."
+        },
+        {
+          "claim": "Understanding both context and relationships is crucial for handling downstream tasks like question answering and language inference.",
+          "verdict": "NOT_MENTIONED",
+          "explanation": "The context does not explicitly state that understanding context and relationships is crucial for handling specific downstream tasks such as question answering and language inference."
+        }
+      ],
+      "supported_claims": 0,
+      "total_claims": 3,
+      "hallucination_score": 1.0,
+      "status": "verification task performed"
+    },
+    "consistency_details": {
+      "average_similarity": 0.9866780042648315,
+      "status": "highly_consistent",
+      "variation_count": 2,
+      "pairwise_similarities": [
+        0.9866780042648315
+      ],
+      "original_answer_length": 348,
+      "variation_1_length": 296,
+      "variation_2_length": 0,
+      "answer_categories": [
+        "valid_long",
+        "valid_long",
+        "empty"
+      ]
+    },
+    "failed_layers": []
+  },
+  "metadata": {
+    "fetched_at": "2026-01-01T13:52:58.147064",
+    "status": "success",
+    "chunk_count": 81,
+    "avg_chunk_length": 967.7777777777778,
+    "summary_generated": true,
+    "vector_store_created": true,
+    "vector_count": 81,
+    "chunks_retrieved": 3,
+    "avg_relevance_score": 0.6663579943333334,
+    "retrieval_method": "vector_similarity",
+    "answer_generated": true,
+    "chunks_used": [
+      6.0,
+      12.0,
+      43.0
+    ],
+    "chunk_relevance_scores": [
+      0.673471451,
+      0.671416283,
+      0.654186249
+    ],
+    "llm_verification_score": 1.0,
+    "answer_consistency": 0.9866780042648315,
+    "final_hallucination_score": 0.4026643991470337,
+    "hallucination_risk": "MEDIUM"
+  },
+  "duration": 57.44302797317505
+}

@@ -5,6 +5,7 @@ from typing import List
 from agents.state import PaperState, create_error_state 
 from utils.prompts import summary_prompt
 from utils.llm import llm_model
+from utils.tracing import get_langfuse_handler
 from core.logging import get_logger
 
 logger = get_logger()
@@ -28,7 +29,7 @@ class SummarizerAgent:
         """Generate structured summary using LLM"""
 
         chain = self.prompt | self.llm | self.parser
-
+        handler = get_langfuse_handler()
         content = state.get("sections", {})
         if not content:
             # Fallback to raw_text if sections not available
@@ -44,12 +45,19 @@ class SummarizerAgent:
             content = raw_text[:5000]
 
         try:
-            summary = await chain.ainvoke({
-                "title": state["title"],
-                "authors": ", ".join(state["authors"]),
-                "content": str(content),
-                "format_instructions": self.parser.get_format_instructions()
-            })
+            summary = await chain.ainvoke(
+                {
+                    "title": state["title"],
+                    "authors": ", ".join(state["authors"]),
+                    "content": str(content),
+                    "format_instructions": self.parser.get_format_instructions()
+                },
+                config={
+                    "callbacks": [handler],
+                    "tags": ["generate_summary"],
+                    "metadata": {"arxiv_id": state["arxiv_id"]}
+                }
+            )
             logger.info(f"Generated summary: {summary}")
             return {
                 "summary": summary.model_dump(),  # Changed to model_dump() to return dict

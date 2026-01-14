@@ -48,6 +48,7 @@ class ResearchAssistant:
         self.workflow.add_node("retrieve_context", self.qa.retrieve_context)
         self.workflow.add_node("generate_answer", self.qa.generate_answer)
         self.workflow.add_node("check_hallucination", self.detector.verify_citations)
+        self.workflow.add_node("verify_claims", self.detector.verify_claims_with_nli)
         self.workflow.add_node("check_consistency", self.detector.cross_check_answer)
         self.workflow.add_node("comprehensive_check", self.detector.comprehensive_check)
 
@@ -69,7 +70,8 @@ class ResearchAssistant:
         
         self.workflow.add_edge("retrieve_context", "generate_answer")
         self.workflow.add_edge("generate_answer", "check_hallucination")
-        self.workflow.add_edge("check_hallucination", "check_consistency")
+        self.workflow.add_edge("check_hallucination", "verify_claims")
+        self.workflow.add_edge("verify_claims", "check_consistency")
         self.workflow.add_edge("check_consistency", "comprehensive_check")
         self.workflow.add_edge("comprehensive_check", END)
 
@@ -95,6 +97,9 @@ class ResearchAssistant:
     @observe
     async def run(self, arxiv_id: str, question: str = None):
         """Main execution with Langfuse tracing"""
+        from utils.tracing import get_langfuse_handler
+        handler = get_langfuse_handler()
+
         langfuse = get_client()
         langfuse.update_current_trace(
             name="research_assistant",
@@ -109,7 +114,7 @@ class ResearchAssistant:
 
         initial_state = validated_input.dict()
 
-        result = await self.graph.ainvoke(initial_state)
+        result = await self.graph.ainvoke(initial_state, config={"callbacks": [handler]})
 
         langfuse.score_current_trace(
             name="execution_success",
