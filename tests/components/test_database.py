@@ -29,6 +29,8 @@ TEST_JOB_ID = "test-job-pytest-001"
 async def db_session_with_cleanup():
     """Fixture that provides session and handles cleanup."""
     # Cleanup before test
+    db_manager.initialize()
+
     async with db_manager.async_engine.begin() as conn:
         await conn.execute(text(f"DELETE FROM paper_qa_cache WHERE arxiv_id = '{TEST_ARXIV_ID}'"))
         await conn.execute(text(f"DELETE FROM job_status WHERE job_id = '{TEST_JOB_ID}'"))

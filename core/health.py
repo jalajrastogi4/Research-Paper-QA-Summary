@@ -78,6 +78,7 @@ class HealthCheck:
         Note: Uses db_manager.get_session() which properly handles the async generator.
         """
         try:
+            db_manager.initialize()
             async with db_manager.async_engine.begin() as session:
                 await session.execute(text("SELECT 1"))
                 self._last_check["database"] = datetime.now(timezone.utc)
